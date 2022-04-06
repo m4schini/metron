@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  coordinator-module:
+    image: 'm4schini/metron-coordinator'
+    build:
+      context: ./coordinator-module
+    environment:
+      - ADDR=:30051
+    ports:
+      - "30051:30051"
+  miner-module:
+    image: 'm4schini/metron-miner'
+    build:
+      context: ./miner-module
+    depends_on:
+      - coordinator-module
+    environment:
+      - ADDR=miner-module:30051
+      - COORDINATOR_ADDR=coordinator-module:30051

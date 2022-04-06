@@ -1,0 +1,3 @@
+[submodule "tiktok-go"]
+	path = tiktok-go
+	url = https://github.com/m4schini/tiktok-go

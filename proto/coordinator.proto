@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package coordinator;
+option go_package = "proto/;proto";
+
+service Coordinator {
+  rpc CheckIn(CheckInRequest) returns (CheckInResponse) {}
+  rpc CheckOut(CheckOutRequest) returns (CheckOutResponse) {}
+}
+
+message CheckInRequest {
+  string minerId = 1;
+  string address = 2;
+}
+
+message CheckInResponse { bool success = 1; }
+
+message CheckOutRequest { string minerId = 1; }
+
+message CheckOutResponse {}

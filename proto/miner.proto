@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package miner;
+option go_package = "proto/;proto";
+
+service Miner {
+  rpc GetAccount(AccountRequest) returns (Account) {}
+  rpc GetVideoDetails(VideoRequest) returns (VideoDetails) {}
+}
+
+message AccountRequest {
+  string name = 1;
+}
+
+message Account {
+  string name = 1;
+  string displayName = 2;
+  string bio = 3;
+  int32 following = 4;
+  int32 followers = 5;
+  int32 likes = 6;
+  string url = 7;
+  repeated VideoPreview videos = 8;
+}
+
+message VideoPreview {
+  string url = 1;
+  string username = 3;
+  string id = 4;
+  int32 views = 2;
+}
+
+message VideoRequest {
+  string url = 1;
+}
+
+message VideoDetails {
+  string url = 1;
+  string videoUrl = 2;
+  string timestamp = 3;
+  string thumbnailUrl = 4;
+
+  int32 views = 5;
+  int32 likes = 6;
+  int32 comments = 7;
+  int32 shares = 8;
+  string audioName = 9;
+  string description = 10;
+}
