@@ -2,7 +2,7 @@ package registry
 
 import (
 	"context"
-	"coordinator-module/scraper"
+	"coordinator-module/miner"
 	"errors"
 	"fmt"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 type registryItem struct {
-	scraper scraper.Scraper
+	scraper miner.Miner
 	locked  bool
 }
 
@@ -27,7 +27,7 @@ func NewMapRegistry() *mapRegistry {
 	return r
 }
 
-func (r *mapRegistry) Register(scraper scraper.Scraper) error {
+func (r *mapRegistry) Register(scraper miner.Miner) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -43,20 +43,21 @@ func (r *mapRegistry) Register(scraper scraper.Scraper) error {
 	return nil
 }
 
-func (r *mapRegistry) Unregister(scraper scraper.Scraper) error {
+func (r *mapRegistry) Unregister(id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	r.scrapers[scraper.ID()] = nil
-	delete(r.scrapers, scraper.ID())
+	r.scrapers[id] = nil
+	delete(r.scrapers, id)
 	return nil
 }
 
-func (r *mapRegistry) Get(ctx context.Context) (scraper.Scraper, error) {
-	scrCh := make(chan scraper.Scraper)
+func (r *mapRegistry) Get(ctx context.Context) (miner.Miner, error) {
+	scrCh := make(chan miner.Miner)
+	stop := false
 
 	go func() {
-		for {
+		for !stop {
 			r.mu.Lock()
 			for _, item := range r.scrapers {
 				if !item.locked {
@@ -67,15 +68,15 @@ func (r *mapRegistry) Get(ctx context.Context) (scraper.Scraper, error) {
 					return
 				}
 			}
-
-			time.Sleep(100 * time.Millisecond)
 			r.mu.Unlock()
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 
 	select {
 	case <-ctx.Done():
-		// return if context is done
+		// return if context is done\
+		stop = true
 		return nil, ctx.Err()
 
 	case scr := <-scrCh:
@@ -84,7 +85,7 @@ func (r *mapRegistry) Get(ctx context.Context) (scraper.Scraper, error) {
 	}
 }
 
-func (r *mapRegistry) GetNow() (scraper.Scraper, error) {
+func (r *mapRegistry) GetNow() (miner.Miner, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -99,7 +100,7 @@ func (r *mapRegistry) GetNow() (scraper.Scraper, error) {
 	return nil, errors.New("no scraper available")
 }
 
-func (r *mapRegistry) Return(scraper scraper.Scraper) error {
+func (r *mapRegistry) Return(scraper miner.Miner) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

@@ -21,6 +21,8 @@ message Account {
   int32 likes = 6;
   string url = 7;
   repeated VideoPreview videos = 8;
+
+  int64 timestamp = 9;
 }
 
 message VideoPreview {
@@ -37,7 +39,7 @@ message VideoRequest {
 message VideoDetails {
   string url = 1;
   string videoUrl = 2;
-  string timestamp = 3;
+  string videoTimestamp = 3;
   string thumbnailUrl = 4;
 
   int32 views = 5;
@@ -46,4 +48,6 @@ message VideoDetails {
   int32 shares = 8;
   string audioName = 9;
   string description = 10;
+
+  int64 timestamp = 11;
 }

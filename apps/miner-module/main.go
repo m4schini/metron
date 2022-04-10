@@ -5,19 +5,19 @@ import (
 	"context"
 	"fmt"
 	"github.com/m4schini/kapitol-go"
-	"math/rand"
+	"google.golang.org/grpc"
 	"miner-module/comm"
+	pb "miner-module/proto"
 	"miner-module/scraper"
+	"net"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 )
 
 var log = kapitol.NewLogger(os.Getenv("APP_NAME"), kapitol.Information)
 
 var scr scraper.Scraper
-
-var maxRetryCooldown = 2 * time.Minute
-var minRetryCooldown = 2 * time.Second
 
 func init() {
 	s, err := scraper.NewScraper()
@@ -49,10 +49,28 @@ func main() {
 		}
 	}()
 
-	d, _ := time.ParseDuration(fmt.Sprintf("%ds", rand.Int()%60))
-	log.Information("alive for another", d)
-	time.Sleep(d)
+	lis, err := net.Listen("tcp", os.Getenv("ADDR"))
+	if err != nil {
+		log.Critical(err)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterMinerServer(grpcServer, comm.NewServer(log, scr.TikTok()))
+	log.Information("serving grpc on", os.Getenv("ADDR"))
+	go func() {
+		err = grpcServer.Serve(lis)
+		if err != nil {
+			log.Critical(err)
+		}
+	}()
+
+	// Wait here until CTRL-C or other term signal is received.
+	fmt.Println("Press CTRL-C to exit.")
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
 
 	// Cleanly shutdown.
 	fmt.Println("\nshutting down...")
+	lis.Close()
 }

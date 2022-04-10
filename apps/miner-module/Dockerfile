@@ -18,13 +18,25 @@ COPY . /src
 WORKDIR /src
 
 RUN go mod tidy
-RUN go build -v -o /$APP_NAME /src/
+RUN CGO_ENABLED=0 go build -v -o /$APP_NAME /src/
 
 # Run Stage
-FROM alpine:latest
+FROM chromedp/headless-shell:latest
 
 ENV APP_NAME miner-module
 
-COPY --from=build /$APP_NAME .
+# installing curl, needed for healtcheck
+RUN apt update
+RUN apt install dumb-init curl -y
 
-ENTRYPOINT ./$APP_NAME
+RUN mkdir /app
+COPY --from=build /$APP_NAME /app/$APP_NAME
+RUN chmod +x /app/$APP_NAME
+
+# running init, required by headless shell to avoid zombie processes
+# ENTRYPOINT ["dumb-init", "--"]
+
+RUN ls -la /
+RUN ls -la /app
+
+ENTRYPOINT /app/$APP_NAME
