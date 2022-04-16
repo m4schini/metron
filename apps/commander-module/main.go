@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"commander-module/api"
 	"commander-module/config"
 	"commander-module/event"
 	"commander-module/persistence"
@@ -37,7 +38,7 @@ func main() {
 			default:
 				for {
 					fmt.Println("CMD > Scan Account:", target.Account)
-					events.Publish("cmd.scan.account", target.Account)
+					events.Publish("account.scan.requested", target.Account)
 					fmt.Printf("CMD > Next Scan for '%s' scheduled at %s\n", target.Account, time.Now().Add(target.Interval))
 					time.Sleep(target.Interval)
 				}
@@ -97,11 +98,16 @@ func main() {
 		})
 	}()
 
+	go func() {
+		err := api.Serve(":8080", events)
+		log.Critical(err)
+	}()
+
 	for {
 		text, _ := reader.ReadString('\n')
 		// convert CRLF to LF
 		text = strings.Replace(text, "\n", "", -1)
 
-		events.Publish("cmd.scan.account", text)
+		events.Publish("account.scan.requested", text)
 	}
 }

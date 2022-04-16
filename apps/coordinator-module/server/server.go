@@ -54,7 +54,7 @@ func (s *Server) CheckIn(ctx context.Context, in *pb.CheckInRequest) (*pb.CheckI
 				Success: false,
 			}, err
 		}
-		log.Println("New checkin:", in.MinerId, s.registry)
+		log.Println("New checkin:", in.MinerId)
 
 		return &pb.CheckInResponse{
 			Success: true,
@@ -71,7 +71,7 @@ func (s *Server) CheckOut(ctx context.Context, in *pb.CheckOutRequest) (*pb.Chec
 		if err != nil {
 			return nil, err
 		}
-		log.Println("Checked out:", in.MinerId, s.registry)
+		log.Println("Checked out:", in.MinerId)
 
 		return &pb.CheckOutResponse{}, nil
 	}

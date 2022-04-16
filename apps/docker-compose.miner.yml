@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  miner-module-A:
+    image: 'm4schini/metron-miner'
+    build:
+      context: ./miner-module
+    depends_on:
+      - tor-proxy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 3
+        window: 120s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TIKTOK_GO_TOR_PROXY_ADDR=tor-proxy:8888
+      - ADDR=miner-module-A:30051
+      - COORDINATOR_ADDR=host.docker.internal:30051
+  miner-module-B:
+    image: 'm4schini/metron-miner'
+    build:
+      context: ./miner-module
+    depends_on:
+      - tor-proxy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 3
+        window: 120s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TIKTOK_GO_TOR_PROXY_ADDR=tor-proxy:8888
+      - ADDR=miner-module-B:30051
+      - COORDINATOR_ADDR=host.docker.internal:30051
+  miner-module-C:
+    image: 'm4schini/metron-miner'
+    build:
+      context: ./miner-module
+    depends_on:
+      - tor-proxy
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 3
+        window: 120s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TIKTOK_GO_TOR_PROXY_ADDR=tor-proxy:8888
+      - ADDR=miner-module-C:30051
+      - COORDINATOR_ADDR=host.docker.internal:30051
+
+  tor-proxy:
+    image: 'pickapp/tor-proxy'
+    environment:
+      - IP_CHANGE_INTERVAL=180
+    ports:
+      - '8888:8888'

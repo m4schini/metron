@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3'
 
 services:
   commander-module:
@@ -6,12 +6,9 @@ services:
     build:
       context: ./commander-module
     depends_on:
-      coordinator-module:
-        condition: service_started
-      redis:
-        condition: service_started
-      database:
-        condition: service_healthy
+      - coordinator-module
+      - redis
+      - database
     environment:
       - EVENT_BUS_ADDR=redis:6379
       - METRON_DB_HOST=database
@@ -31,16 +28,16 @@ services:
       - EVENT_BUS_PASSWORD=
     ports:
       - "30051:30051"
-  miner-module:
-    image: 'm4schini/metron-miner'
-    build:
-      context: ./miner-module
-    depends_on:
-      - coordinator-module
-      - tor-proxy
-    environment:
-      - ADDR=miner-module:30051
-      - COORDINATOR_ADDR=coordinator-module:30051
+  #miner-module:
+  #  image: 'm4schini/metron-miner'
+  #  build:
+  #    context: ./miner-module
+  #  depends_on:
+  #    - coordinator-module
+  #    - tor-proxy
+  #  environment:
+  #    - ADDR=miner-module:30051
+  #    - COORDINATOR_ADDR=coordinator-module:30051
 
   database:
     image: 'docker.io/library/mariadb:10.3'
@@ -62,9 +59,9 @@ services:
     hostname: redis
     ports:
       - "6379:6379"
-  tor-proxy:
-    image: 'pickapp/tor-proxy'
-    environment:
-      - IP_CHANGE_INTERVAL=180
-    ports:
-      - '8888:8888'
+  #tor-proxy:
+  #  image: 'pickapp/tor-proxy'
+  #  environment:
+  #    - IP_CHANGE_INTERVAL=180
+  #  ports:
+  #    - '8888:8888'

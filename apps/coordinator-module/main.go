@@ -4,13 +4,16 @@ package main
 import (
 	"context"
 	"coordinator-module/event"
+	"coordinator-module/model"
 	"coordinator-module/registry"
 	"coordinator-module/server"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/m4schini/kapitol-go"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
@@ -36,11 +39,13 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	events.OnEvent(ctx, "cmd.scan.*", func(target string) {
-		log.Debug("received scan command for", target)
-		err := runScan(reg, events, target)
-		if err != nil {
-			log.Error(err)
+	events.OnEvent(ctx, "account.scan.requested", func(target string) {
+		if target != "" {
+			log.Debug("received scan command for", target)
+			err := runScan(reg, events, target)
+			if err != nil {
+				log.Error(err)
+			}
 		}
 	})
 
@@ -55,8 +60,13 @@ func main() {
 }
 
 func runScan(reg registry.Registrar, events event.PubSub, target string) error {
+	if strings.Trim(target, " ") == "" {
+		return errors.New("scan target is missing")
+	}
+
 	log.Information(target, "waiting for scraper")
 	scr, err := reg.Get(context.Background())
+	log.Debug("MINERS AVAILABLE:", reg.Available())
 	if err != nil {
 		return err
 	}
@@ -64,6 +74,7 @@ func runScan(reg registry.Registrar, events event.PubSub, target string) error {
 	defer func() {
 		log.Information(target, "returning scraper")
 		reg.Return(scr)
+		log.Debug("MINERS AVAILABLE:", reg.Available())
 	}()
 
 	acc, vids, err := scr.GetAccount(target)
@@ -79,23 +90,46 @@ func runScan(reg registry.Registrar, events event.PubSub, target string) error {
 		events.Publish("account.scanned", string(jason))
 	}
 
-	for _, vid := range vids {
-		video, err := scr.GetVideoDetails(vid.Username, vid.ID)
-		if err != nil {
-			log.Error(err)
-			continue
-		}
-		video.Views = vid.Views
-		log.Information("scanned vid:", video.Username, video.ID)
+	go func() {
+		for _, vid := range vids {
+			go func(vid *model.Video) {
+				jason, err := scanVideo(reg, vid)
+				if err != nil {
+					log.Error(err)
+					return
+				}
 
-		jason, err := json.Marshal(video)
-		if err != nil {
-			log.Error(err)
-			continue
-		} else {
-			events.Publish("video.scanned", string(jason))
+				events.Publish("video.scanned", jason)
+			}(vid)
 		}
-	}
+	}()
 
 	return nil
+}
+
+func scanVideo(reg registry.Registrar, vid *model.Video) (*string, error) {
+	scr, err := reg.Get(context.Background())
+	log.Debug("MINERS AVAILABLE:", reg.Available())
+	defer func() {
+		reg.Return(scr)
+		log.Debug("MINERS AVAILABLE:", reg.Available())
+	}()
+	if err != nil {
+		return nil, err
+	}
+
+	video, err := scr.GetVideoDetails(vid.Username, vid.ID)
+	if err != nil {
+		return nil, err
+	}
+	video.Views = vid.Views
+	log.Information("scanned vid:", video.Username, video.ID)
+
+	jason, err := json.Marshal(video)
+	if err != nil {
+		return nil, err
+	} else {
+		j := string(jason)
+		return &j, nil
+	}
 }

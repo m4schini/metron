@@ -20,4 +20,6 @@ type Registrar interface {
 
 	//Return unlocks a scraper in the registry, so it can be used again
 	Return(scraper miner.Miner) error
+
+	Available() int
 }
