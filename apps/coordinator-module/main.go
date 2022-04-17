@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/m4schini/kapitol-go"
+	"github.com/m4schini/tiktok-go/util"
 	"os"
 	"os/signal"
 	"strings"
@@ -39,15 +40,34 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	events.OnEvent(ctx, "account.scan.requested", func(target string) {
-		if target != "" {
-			log.Debug("received scan command for", target)
-			err := runScan(reg, events, target)
-			if err != nil {
-				log.Error(err)
+	go func() {
+		events.OnEvent(ctx, "account.scan.requested", func(target string) {
+			if target != "" {
+				log.Debug("received scan command for", target)
+				err := runScan(reg, events, target)
+				if err != nil {
+					log.Error(err)
+				}
 			}
-		}
-	})
+		})
+	}()
+
+	go func() {
+		events.OnEvent(ctx, "video.scan.requested", func(target string) {
+			if target != "" {
+				log.Debug("received scan command for", target)
+
+				username, id := util.ExtractUsernameAndId(target)
+
+				data, err := scanVideo(reg, username, id, -1)
+				if err != nil {
+					log.Error(err)
+				}
+
+				events.Publish(" video.scanned", data)
+			}
+		})
+	}()
 
 	// Wait here until CTRL-C or other term signal is received.
 	fmt.Println("Press CTRL-C to exit.")
@@ -93,7 +113,7 @@ func runScan(reg registry.Registrar, events event.PubSub, target string) error {
 	go func() {
 		for _, vid := range vids {
 			go func(vid *model.Video) {
-				jason, err := scanVideo(reg, vid)
+				jason, err := scanVideo(reg, vid.Username, vid.ID, vid.Views)
 				if err != nil {
 					log.Error(err)
 					return
@@ -107,7 +127,7 @@ func runScan(reg registry.Registrar, events event.PubSub, target string) error {
 	return nil
 }
 
-func scanVideo(reg registry.Registrar, vid *model.Video) (*string, error) {
+func scanVideo(reg registry.Registrar, username, id string, views int) (*string, error) {
 	scr, err := reg.Get(context.Background())
 	log.Debug("MINERS AVAILABLE:", reg.Available())
 	defer func() {
@@ -118,11 +138,12 @@ func scanVideo(reg registry.Registrar, vid *model.Video) (*string, error) {
 		return nil, err
 	}
 
-	video, err := scr.GetVideoDetails(vid.Username, vid.ID)
+	video, err := scr.GetVideoDetails(username, id)
 	if err != nil {
 		return nil, err
 	}
-	video.Views = vid.Views
+
+	video.Views = views
 	log.Information("scanned vid:", video.Username, video.ID)
 
 	jason, err := json.Marshal(video)

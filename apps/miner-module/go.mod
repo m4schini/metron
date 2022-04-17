@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/google/uuid v1.1.2
 	github.com/m4schini/kapitol-go v0.6.1
-	github.com/m4schini/tiktok-go v1.8.3
+	github.com/m4schini/tiktok-go v1.8.5
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.27.1
 )

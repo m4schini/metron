@@ -66,8 +66,8 @@ github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8Hm
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/m4schini/kapitol-go v0.6.1 h1:TTGyFmcCvNXKm1Ga7OUi0wiaRRMsAX1y9zyUCXQgAMo=
 github.com/m4schini/kapitol-go v0.6.1/go.mod h1:KuNsMbhJXLQrlwooiIARz43pUewGh2K3JXbOdCvRwyM=
-github.com/m4schini/tiktok-go v1.8.3 h1:kRGz/UG4U2xUAbn2235FS3gQC4xDq8bsDYGoMo0PJHg=
-github.com/m4schini/tiktok-go v1.8.3/go.mod h1:sOWS0Qn9qB8f/QvT6YqKEinY1x1yMJsFdh1KuFzWzjw=
+github.com/m4schini/tiktok-go v1.8.5 h1:IHB40ZP75ASLG3wgnhN+mQ8QSAWjyobk7/bMdXQ1YRg=
+github.com/m4schini/tiktok-go v1.8.5/go.mod h1:sOWS0Qn9qB8f/QvT6YqKEinY1x1yMJsFdh1KuFzWzjw=
 github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/orisano/pixelmatch v0.0.0-20210112091706-4fa4c7ba91d5 h1:1SoBaSPudixRecmlHXb/GxmaD3fLMtHIDN13QujwQuc=
