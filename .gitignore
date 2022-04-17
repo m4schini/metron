@@ -1,2 +1,7 @@
 ./tiktok-go
 ./legacy
+
+**/.env
+**/.env/*
+
+./.idea
