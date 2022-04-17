@@ -1,10 +1,13 @@
 METRON
 ---
+
 ## Notice
 **Not intended for production!**
 This project is kind of a playground. I'm testing and learning a variety of architecture and design pattern, 
 languages and technologies. Because of this, im not necessarily trying to reach the defined goal, and rather 
 im trying to learn as much as I can
+
+**EDIT 17.04.2022**: TikTok seems to be extending and improving their bot protection at the moment. Because of that I will put this project on-hold, let's see if I will pick it up again someday.
 
 ## Goal
 Creating a third-party analytics platform for tiktok.com.
