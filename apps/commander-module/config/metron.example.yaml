@@ -1,0 +1,5 @@
+targets:
+  - account: tagesschau
+    interval: 1h
+  - account: billieeilish
+    interval: 24h

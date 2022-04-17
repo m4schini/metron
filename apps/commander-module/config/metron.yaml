@@ -1,5 +1,0 @@
-targets:
-  - account: krawallklara2.0
-    interval: 1h
-  - account: krawallklara
-    interval: 5m
